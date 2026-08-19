@@ -73,17 +73,9 @@ spec:
         {{- toYaml .Values.autorecovery.topologySpreadConstraints | nindent 8 }}
     {{- end }}
       affinity:
-        {{- if .Values.autorecovery.affinity.node_affinity}}
+        {{- with .Values.autorecovery.affinity.nodeAffinity }}
         nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-            - matchExpressions:
-              - key: {{ .Values.autorecovery.affinity.node_affinity.matchExpression.key }}
-                operator: {{ .Values.autorecovery.affinity.node_affinity.matchExpression.operator }}
-                values:
-                {{- range .Values.autorecovery.affinity.node_affinity.matchExpression.values }}
-                - {{ . }}
-                {{- end }}
+          {{- toYaml . | nindent 10 }}
         {{- end }}
         {{- if and .Values.affinity.anti_affinity .Values.autorecovery.affinity.anti_affinity}}
         podAntiAffinity:

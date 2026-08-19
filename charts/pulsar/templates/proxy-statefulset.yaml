@@ -71,17 +71,9 @@ spec:
         {{- toYaml .Values.proxy.topologySpreadConstraints | nindent 8 }}
     {{- end }}
       affinity:
-        {{- if .Values.proxy.affinity.node_affinity}}
+        {{- with .Values.proxy.affinity.nodeAffinity }}
         nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-            - matchExpressions:
-              - key: {{ .Values.proxy.affinity.node_affinity.matchExpression.key }}
-                operator: {{ .Values.proxy.affinity.node_affinity.matchExpression.operator }}
-                values:
-                {{- range .Values.proxy.affinity.node_affinity.matchExpression.values }}
-                - {{ . }}
-                {{- end }}
+          {{- toYaml . | nindent 10 }}
         {{- end }}
         {{- if and .Values.affinity.anti_affinity .Values.proxy.affinity.anti_affinity}}
         podAntiAffinity:
