@@ -62,6 +62,11 @@ spec:
       topologySpreadConstraints:
         {{- toYaml .Values.pulsar_manager.topologySpreadConstraints | nindent 8 }}
     {{- end }}
+    {{- with (.Values.pulsar_manager.affinity).nodeAffinity }}
+      affinity:
+        nodeAffinity:
+          {{- toYaml . | nindent 10 }}
+    {{- end }}
       terminationGracePeriodSeconds: {{ .Values.pulsar_manager.gracePeriod }}
       {{- if .Values.pulsar_manager.initContainers }}
       initContainers:

@@ -50,6 +50,11 @@ spec:
       {{- if .Values.pulsar_metadata.tolerations }}
 {{ toYaml .Values.pulsar_metadata.tolerations | indent 8 }}
       {{- end }}
+      {{- with (.Values.pulsar_metadata.affinity).nodeAffinity }}
+      affinity:
+        nodeAffinity:
+          {{- toYaml . | nindent 10 }}
+      {{- end }}
       restartPolicy: OnFailure
       initContainers:
         - name: wait-pulsar-manager-ready
