@@ -65,17 +65,9 @@ spec:
       priorityClassName: {{ .Values.oxia.server.priorityClassName }}
     {{- end }}
       affinity:
-        {{- if .Values.oxia.server.affinity.node_affinity}}
+        {{- with .Values.oxia.server.affinity.nodeAffinity }}
         nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-            - matchExpressions:
-              - key: {{ .Values.oxia.server.affinity.node_affinity.matchExpression.key }}
-                operator: {{ .Values.oxia.server.affinity.node_affinity.matchExpression.operator }}
-                values:
-                {{- range .Values.oxia.server.affinity.node_affinity.matchExpression.values }}
-                - {{ . }}
-                {{- end }}
+          {{- toYaml . | nindent 10 }}
         {{- end }}
         {{- if and .Values.affinity.anti_affinity .Values.oxia.server.affinity.anti_affinity}}
         podAntiAffinity:
