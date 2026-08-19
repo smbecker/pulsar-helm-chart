@@ -106,59 +106,15 @@ spec:
       topologySpreadConstraints:
         {{- toYaml .Values.broker.topologySpreadConstraints | nindent 8 }}
     {{- end }}
+    {{- /* This short-lived cleanup hook intentionally has no pod anti-affinity: spreading a
+         single-shot kubectl pod across nodes buys nothing, and inheriting the component's
+         required anti-affinity would make the hook unschedulable once every node already
+         runs a broker pod. */}}
+    {{- with .Values.broker.affinity.nodeAffinity }}
       affinity:
-        {{- if .Values.broker.affinity.node_affinity}}
         nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-            - matchExpressions:
-              - key: {{ .Values.broker.affinity.node_affinity.matchExpression.key }}
-                operator: {{ .Values.broker.affinity.node_affinity.matchExpression.operator }}
-                values:
-                {{- range .Values.broker.affinity.node_affinity.matchExpression.values }}
-                - {{ . }}
-                {{- end }}
-        {{- end }}
-        {{- if and .Values.affinity.anti_affinity .Values.broker.affinity.anti_affinity}}
-        podAntiAffinity:
-          {{- if eq .Values.broker.affinity.type "requiredDuringSchedulingIgnoredDuringExecution"}}
-          {{ .Values.broker.affinity.type }}:
-          - labelSelector:
-              matchExpressions:
-              - key: "app"
-                operator: In
-                values:
-                - "{{ template "pulsar.name" . }}"
-              - key: "release"
-                operator: In
-                values:
-                - {{ .Release.Name }}
-              - key: "component"
-                operator: In
-                values:
-                - {{ .Values.broker.component }}
-            topologyKey: {{ .Values.broker.affinity.anti_affinity_topology_key }}
-          {{- else }}
-          {{ .Values.broker.affinity.type }}:
-            - weight: 100
-              podAffinityTerm:
-                labelSelector:
-                  matchExpressions:
-                    - key: "app"
-                      operator: In
-                      values:
-                      - "{{ template "pulsar.name" . }}"
-                    - key: "release"
-                      operator: In
-                      values:
-                      - {{ .Release.Name }}
-                    - key: "component"
-                      operator: In
-                      values:
-                      - {{ .Values.broker.component }}
-                topologyKey: {{ .Values.broker.affinity.anti_affinity_topology_key }}
-          {{- end }}
-        {{- end }}
+          {{- toYaml . | nindent 10 }}
+    {{- end }}
       containers:
         - name: sts-cleanup
           image: "{{ template "pulsar.imageFullName" (dict "image" .Values.images.kubectl "root" .) }}"
